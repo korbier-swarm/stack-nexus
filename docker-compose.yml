@@ -1,0 +1,30 @@
+version: '3.1'
+
+networks:
+  proxy:
+    external: true
+
+services:
+
+  repos:
+    image: perceval:9001/nexus
+    restart: always
+    volumes:
+      - "/home/pi/volumes-shared/nexus:/opt/sonatype/sonatype-work/nexus3"
+    ports:
+      - 10007:8082 
+      - 10006:8081
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.nexus.rule=Host(`nexus.home`)"
+        - "traefik.http.routers.nexus.entrypoints=web"
+        - "traefik.http.services.nexus.loadbalancer.server.port=8081"
+        - "traefik.docker.network=proxy"
+    networks:
+      - proxy
+
+ 
